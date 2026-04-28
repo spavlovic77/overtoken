@@ -1,12 +1,46 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { CheckCircle2, XCircle } from "lucide-react"
+import { Check, CheckCircle2, Copy, XCircle } from "lucide-react"
 import type { VerificationResult } from "@/types/database"
 
 interface VerificationResultProps {
   result: VerificationResult
   onVerifyAnother: () => void
+}
+
+function DicCard({ label, value }: { label: string; value: string }) {
+  const [copied, setCopied] = useState(false)
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(value)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+  return (
+    <div className="flex items-start justify-between gap-2 rounded-lg bg-muted/30 p-3">
+      <div className="min-w-0">
+        <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+          {label}
+        </dt>
+        <dd className="font-mono text-foreground">{value}</dd>
+      </div>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={handleCopy}
+        aria-label={`Copy ${label}`}
+        className="-mr-1 -mt-1 h-7 w-7 text-muted-foreground hover:text-foreground"
+      >
+        {copied ? (
+          <Check className="h-3.5 w-3.5" />
+        ) : (
+          <Copy className="h-3.5 w-3.5" />
+        )}
+      </Button>
+    </div>
+  )
 }
 
 export function VerificationResultCard({
@@ -41,18 +75,8 @@ export function VerificationResultCard({
       </div>
 
       <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
-        <div className="rounded-lg bg-muted/30 p-3">
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-            DIC of service provider
-          </dt>
-          <dd className="font-mono text-foreground">{result.dic1}</dd>
-        </div>
-        <div className="rounded-lg bg-muted/30 p-3">
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-            DIC of participant
-          </dt>
-          <dd className="font-mono text-foreground">{result.dic2}</dd>
-        </div>
+        <DicCard label="DIC of service provider" value={result.dic1} />
+        <DicCard label="DIC of participant" value={result.dic2} />
       </dl>
 
       <Button variant="outline" onClick={onVerifyAnother} className="w-full">
