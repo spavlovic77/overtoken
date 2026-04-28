@@ -5,6 +5,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get("code")
   const pendingVerification = searchParams.get("pendingVerification")
+  const pendingGeneration = searchParams.get("pendingGeneration")
 
   if (code) {
     const supabase = await createClient()
@@ -12,6 +13,11 @@ export async function GET(request: Request) {
     if (!error) {
       if (pendingVerification === "true") {
         return NextResponse.redirect(`${origin}/?pendingVerification=true`)
+      }
+      if (pendingGeneration === "true") {
+        return NextResponse.redirect(
+          `${origin}/generate?pendingGeneration=true`
+        )
       }
       return NextResponse.redirect(`${origin}/dashboard`)
     }

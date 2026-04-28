@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import {
   ArrowLeft,
@@ -26,6 +26,8 @@ interface GenerateContentProps {
   profile: Profile | null
 }
 
+const PENDING_INPUT_KEY = "pendingGenerationInput"
+
 export function GenerateContent({ user, profile }: GenerateContentProps) {
   const [dic1, setDic1] = useState("")
   const [dic2, setDic2] = useState("")
@@ -45,29 +47,58 @@ export function GenerateContent({ user, profile }: GenerateContentProps) {
   const canSubmit =
     !isGenerating && /^\d{10}$/.test(dic1) && /^\d{10}$/.test(dic2)
 
+  const runGeneration = useCallback(
+    async (input: { dic1: string; dic2: string }) => {
+      setIsGenerating(true)
+      setError(null)
+      setToken(null)
+      setVerifyResult(null)
+      try {
+        const res = await fetch("/api/v1/sign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || "Token generation failed")
+        setToken(data.verificationToken)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred")
+      } finally {
+        setIsGenerating(false)
+      }
+    },
+    []
+  )
+
+  // After OAuth round-trip: restore pending DICs and auto-generate
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("pendingGeneration") !== "true" || !user) return
+
+    window.history.replaceState({}, "", window.location.pathname)
+
+    const stored = localStorage.getItem(PENDING_INPUT_KEY)
+    if (!stored) return
+    try {
+      const restored = JSON.parse(stored) as { dic1: string; dic2: string }
+      localStorage.removeItem(PENDING_INPUT_KEY)
+      setDic1(restored.dic1)
+      setDic2(restored.dic2)
+      void runGeneration(restored)
+    } catch {
+      localStorage.removeItem(PENDING_INPUT_KEY)
+    }
+  }, [user, runGeneration])
+
   const handleGenerate = async () => {
     if (!user) {
+      localStorage.setItem(PENDING_INPUT_KEY, JSON.stringify({ dic1, dic2 }))
       setShowAuthModal(true)
       return
     }
-    setIsGenerating(true)
-    setError(null)
-    setToken(null)
-    setVerifyResult(null)
-    try {
-      const res = await fetch("/api/v1/sign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dic1, dic2 }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || "Token generation failed")
-      setToken(data.verificationToken)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred")
-    } finally {
-      setIsGenerating(false)
-    }
+    await runGeneration({ dic1, dic2 })
   }
 
   const handleCopy = async () => {
@@ -339,7 +370,11 @@ export function GenerateContent({ user, profile }: GenerateContentProps) {
         </motion.div>
       </main>
 
-      <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
+      <AuthModal
+        open={showAuthModal}
+        onOpenChange={setShowAuthModal}
+        pendingFlag="pendingGeneration"
+      />
     </div>
   )
 }

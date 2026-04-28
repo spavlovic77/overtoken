@@ -12,16 +12,18 @@ import {
 interface AuthModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  pendingFlag?: "pendingVerification" | "pendingGeneration"
 }
 
-export function AuthModal({ open, onOpenChange }: AuthModalProps) {
+export function AuthModal({ open, onOpenChange, pendingFlag }: AuthModalProps) {
   const supabase = createClient()
 
   const signIn = async () => {
+    const query = pendingFlag ? `?${pendingFlag}=true` : ""
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?pendingVerification=true`,
+        redirectTo: `${window.location.origin}/auth/callback${query}`,
       },
     })
   }

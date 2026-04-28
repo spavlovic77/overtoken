@@ -317,7 +317,11 @@ export function LandingContent({
         </div>
       </footer>
 
-      <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
+      <AuthModal
+        open={showAuthModal}
+        onOpenChange={setShowAuthModal}
+        pendingFlag="pendingVerification"
+      />
     </div>
   )
 }
