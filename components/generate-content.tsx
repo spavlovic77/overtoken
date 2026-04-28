@@ -41,8 +41,9 @@ export function GenerateContent({ user, profile }: GenerateContentProps) {
 
   const supabase = createClient()
 
+  const onlyDigits = (s: string) => s.replace(/\D/g, "").slice(0, 10)
   const canSubmit =
-    !isGenerating && dic1.trim().length > 0 && dic2.trim().length > 0
+    !isGenerating && /^\d{10}$/.test(dic1) && /^\d{10}$/.test(dic2)
 
   const handleGenerate = async () => {
     if (!user) {
@@ -201,8 +202,11 @@ export function GenerateContent({ user, profile }: GenerateContentProps) {
                   <Input
                     id="gen-dic1"
                     value={dic1}
-                    onChange={(e) => setDic1(e.target.value)}
+                    onChange={(e) => setDic1(onlyDigits(e.target.value))}
                     placeholder="e.g. 9876543210"
+                    inputMode="numeric"
+                    pattern="\d{10}"
+                    maxLength={10}
                     autoComplete="off"
                     spellCheck={false}
                     disabled={isGenerating}
@@ -213,8 +217,11 @@ export function GenerateContent({ user, profile }: GenerateContentProps) {
                   <Input
                     id="gen-dic2"
                     value={dic2}
-                    onChange={(e) => setDic2(e.target.value)}
+                    onChange={(e) => setDic2(onlyDigits(e.target.value))}
                     placeholder="e.g. 1234567890"
+                    inputMode="numeric"
+                    pattern="\d{10}"
+                    maxLength={10}
                     autoComplete="off"
                     spellCheck={false}
                     disabled={isGenerating}

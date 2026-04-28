@@ -28,11 +28,12 @@ export function VerificationForm({
   disabled,
   submitLabel = "Verify token",
 }: VerificationFormProps) {
+  const onlyDigits = (s: string) => s.replace(/\D/g, "").slice(0, 10)
   const canSubmit =
     !disabled &&
     !isVerifying &&
-    values.dic1.trim().length > 0 &&
-    values.dic2.trim().length > 0 &&
+    /^\d{10}$/.test(values.dic1) &&
+    /^\d{10}$/.test(values.dic2) &&
     /^[0-9a-fA-F]{512}$/.test(values.verificationToken.trim())
 
   return (
@@ -49,8 +50,13 @@ export function VerificationForm({
           <Input
             id="dic1"
             value={values.dic1}
-            onChange={(e) => onChange({ ...values, dic1: e.target.value })}
+            onChange={(e) =>
+              onChange({ ...values, dic1: onlyDigits(e.target.value) })
+            }
             placeholder="e.g. 9876543210"
+            inputMode="numeric"
+            pattern="\d{10}"
+            maxLength={10}
             autoComplete="off"
             spellCheck={false}
             disabled={isVerifying}
@@ -61,8 +67,13 @@ export function VerificationForm({
           <Input
             id="dic2"
             value={values.dic2}
-            onChange={(e) => onChange({ ...values, dic2: e.target.value })}
+            onChange={(e) =>
+              onChange({ ...values, dic2: onlyDigits(e.target.value) })
+            }
             placeholder="e.g. 1234567890"
+            inputMode="numeric"
+            pattern="\d{10}"
+            maxLength={10}
             autoComplete="off"
             spellCheck={false}
             disabled={isVerifying}
