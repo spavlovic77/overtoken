@@ -3,8 +3,24 @@
 import Link from "next/link"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ChevronDown, Code2, Copy, Check, Key, Terminal } from "lucide-react"
+import {
+  ChevronDown,
+  Code2,
+  Copy,
+  Check,
+  FileCode2,
+  Key,
+  Terminal,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { BUNDLED_PUBLIC_KEY_PEM } from "@/lib/public-key-pem"
 import type { User } from "@supabase/supabase-js"
 
 interface DeveloperSectionProps {
@@ -64,6 +80,8 @@ export function DeveloperSection({ user, onAuthRequired }: DeveloperSectionProps
   const [isExpanded, setIsExpanded] = useState(false)
   const [language, setLanguage] = useState<CodeLanguage>("curl")
   const [copied, setCopied] = useState(false)
+  const [showPubKey, setShowPubKey] = useState(false)
+  const [pubKeyCopied, setPubKeyCopied] = useState(false)
 
   const origin =
     typeof window !== "undefined" ? window.location.origin : "https://overtoken.app"
@@ -73,6 +91,12 @@ export function DeveloperSection({ user, onAuthRequired }: DeveloperSectionProps
     await navigator.clipboard.writeText(snippet)
     setCopied(true)
     setTimeout(() => setCopied(false), 1500)
+  }
+
+  const handleCopyPubKey = async () => {
+    await navigator.clipboard.writeText(BUNDLED_PUBLIC_KEY_PEM)
+    setPubKeyCopied(true)
+    setTimeout(() => setPubKeyCopied(false), 1500)
   }
 
   return (
@@ -104,9 +128,22 @@ export function DeveloperSection({ user, onAuthRequired }: DeveloperSectionProps
           >
             <div className="mt-4 flex flex-col gap-5 rounded-2xl glass-subtle border border-glass-border p-6">
               <section className="flex flex-col gap-3">
-                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                  <Terminal className="h-4 w-4" />
-                  Endpoint
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <Terminal className="h-4 w-4" />
+                    Endpoint
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowPubKey(true)}
+                    className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+                    aria-label="Show public key"
+                  >
+                    <FileCode2 className="h-3.5 w-3.5" />
+                    Public key
+                  </Button>
                 </div>
                 <code className="block rounded-lg bg-muted/40 px-3 py-2 font-mono text-sm">
                   POST {ENDPOINT}
@@ -189,6 +226,51 @@ export function DeveloperSection({ user, onAuthRequired }: DeveloperSectionProps
           </motion.div>
         )}
       </AnimatePresence>
+
+      <Dialog open={showPubKey} onOpenChange={setShowPubKey}>
+        <DialogContent
+          className="sm:max-w-2xl glass-heavy border-glass-border"
+          showCloseButton
+        >
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileCode2 className="h-5 w-5 text-primary" />
+              Verification public key
+            </DialogTitle>
+            <DialogDescription>
+              X.509 certificate (PEM). overtoken uses the public key inside it
+              to verify RSA-PSS signatures of <code className="font-mono">DIC1:DIC2</code>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-end">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleCopyPubKey}
+                className="gap-1.5"
+              >
+                {pubKeyCopied ? (
+                  <>
+                    <Check className="h-3.5 w-3.5" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3.5 w-3.5" />
+                    Copy PEM
+                  </>
+                )}
+              </Button>
+            </div>
+            <pre className="max-h-[60vh] overflow-auto whitespace-pre rounded-lg bg-muted/40 p-4 font-mono text-xs leading-relaxed text-foreground">
+              {BUNDLED_PUBLIC_KEY_PEM}
+            </pre>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
