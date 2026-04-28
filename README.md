@@ -20,7 +20,7 @@ proven to have been signed by the holder of the matching private key.
 
 Mirrors `peppol-validator-api`:
 
-- Browser users: Supabase OAuth (Google / Apple) → `/dashboard` for managing keys.
+- Browser users: Supabase OAuth (Google) → `/dashboard` for managing keys.
 - API consumers: `X-API-Key` + `X-API-Secret` headers.
   Keys: `ot_<hex>`. Secrets: `ots_<base64url>` (only the SHA-256 hash is stored).
 
