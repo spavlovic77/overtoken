@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
 import { LogOut, Github, ShieldCheck } from "lucide-react"
@@ -297,6 +298,12 @@ export function LandingContent({
             <p className="text-xs text-muted-foreground italic">
               overtoken — RSA-PSS signature verification service
             </p>
+            <Link
+              href="/generate"
+              className="text-xs text-muted-foreground/70 underline-offset-4 hover:text-foreground hover:underline"
+            >
+              Generate a test token
+            </Link>
             <a
               href="https://github.com/"
               target="_blank"

@@ -17,3 +17,10 @@ export const verifySchema = z.object({
 })
 
 export type VerifyInput = z.infer<typeof verifySchema>
+
+export const signSchema = z.object({
+  dic1: z.string().min(1, 'dic1 is required').max(64),
+  dic2: z.string().min(1, 'dic2 is required').max(64),
+})
+
+export type SignInput = z.infer<typeof signSchema>
