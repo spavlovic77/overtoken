@@ -34,7 +34,7 @@ export function VerificationForm({
     !isVerifying &&
     /^\d{10}$/.test(values.dic1) &&
     /^\d{10}$/.test(values.dic2) &&
-    /^[0-9a-fA-F]{512}$/.test(values.verificationToken.trim())
+    /^[0-9a-fA-F]{768}$/.test(values.verificationToken.trim())
 
   return (
     <form
@@ -89,14 +89,14 @@ export function VerificationForm({
           onChange={(e) =>
             onChange({ ...values, verificationToken: e.target.value })
           }
-          placeholder="512 hexadecimal characters (256-byte RSA-PSS signature)"
+          placeholder="768 hexadecimal characters (384-byte RSA-PSS signature)"
           rows={5}
           spellCheck={false}
           disabled={isVerifying}
           className="font-mono text-xs flex w-full rounded-md border border-input bg-background px-3 py-2 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
         />
         <p className="text-xs text-muted-foreground">
-          {values.verificationToken.trim().length} / 512 hex characters
+          {values.verificationToken.trim().length} / 768 hex characters
         </p>
       </div>
 
